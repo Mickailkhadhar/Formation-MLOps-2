@@ -28,4 +28,8 @@ jobs:
       # Add behave command
       - name: Run functional tests with Behave
         run: PYTHONPATH=. behave tests/test_functional/training_workflow.py
+      - name: Quality checks
+        run: | 
+          python -m pytest --cov=formation_indus_ds_avancee/tests/test_unit/ -vv -p no:warnings
+          ./tests/tests_pyramid.sh
 
