@@ -24,6 +24,6 @@ jobs:
       - name: Run Vulture
         run:  vulture tests/test_unit/test_feature_engineering.py
       - name: Run tests
-        run:  pytest tests/test_unit/test_feature_engineering.py
+        run:  PYTHONPATH=. pytest tests/test_unit/test_feature_engineering.py
 
 
