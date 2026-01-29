@@ -18,7 +18,9 @@ def train_model(features: pd.DataFrame, model_registry_folder: str) -> None:
     y = features[target]
     model = RandomForestRegressor(n_estimators=1, max_depth=10, n_jobs=1)
     model.fit(X, y)
-    joblib.dump(model, os.path.join(model_registry_folder, 'model.joblib'))
+    timestamp = time.strftime('%Y%m%d-%H%M%S')
+    model_filename = f'model_{timestamp}.joblib'
+    joblib.dump(model, os.path.join(model_registry_folder, model_filename))
 
 
 def predict_with_io(features_path: str, model_path: str, predictions_folder: str) -> None:
@@ -31,7 +33,21 @@ def predict_with_io(features_path: str, model_path: str, predictions_folder: str
     features[['predictions', 'predictions_time']].to_csv(os.path.join(predictions_folder, 'latest.csv'), index=False)
 
 
-def predict(features: pd.DataFrame, model_path: str) -> pd.DataFrame:
-    model = joblib.load(model_path)
+def predict(features: pd.DataFrame, model_registry_folder: str) -> pd.DataFrame:
+    import os
+
+    # Find the latest model file by timestamp in the filename
+    model_files = [
+        f for f in os.listdir(model_registry_folder) if f.startswith('model_') and f.endswith('.joblib')
+    ]
+    if not model_files:
+        raise FileNotFoundError("No model file found in model_registry_folder")
+    
+    # Sort by timestamp extracted from filename
+    model_files.sort(reverse=True)
+    latest_model_path = os.path.join(model_registry_folder, model_files[0])
+
+    model = joblib.load(latest_model_path)
     features['predictions'] = model.predict(features)
     return features
+
